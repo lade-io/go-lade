@@ -1,0 +1,17 @@
+language: go
+go:
+  - 1.13.x
+os:
+  - linux
+script:
+  - go vet
+  - printf '## Changelog\n\n' > CHANGELOG.md
+  - git log --pretty=oneline --abbrev-commit --no-color $TRAVIS_COMMIT >> CHANGELOG.md
+deploy:
+  - provider: releases
+    token: $GITHUB_TOKEN
+    release_notes_file: CHANGELOG.md
+    file: ''
+    edge: true
+    on:
+      tags: true
