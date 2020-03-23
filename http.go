@@ -19,6 +19,10 @@ import (
 	"nhooyr.io/websocket"
 )
 
+func init() {
+	structs.DefaultTagName = "json"
+}
+
 const (
 	jsonType = "application/json"
 )

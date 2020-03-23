@@ -37,7 +37,7 @@ var (
 const (
 	DefaultClientID  = "lade-client"
 	defaultAPIURL    = "https://api.lade.io"
-	defaultTimeout   = 15 * time.Second
+	defaultTimeout   = 30 * time.Second
 	apiVersion       = "/v1/"
 	libraryUserAgent = "go-lade/" + libraryVersion
 	libraryVersion   = "1.0"

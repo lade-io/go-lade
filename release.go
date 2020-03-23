@@ -7,7 +7,7 @@ type ReleaseClient struct {
 }
 
 type ReleaseCreateOpts struct {
-	Source *File `structs:"source,omitnested"`
+	Source *File `json:"source,omitnested"`
 }
 
 type ReleaseService interface {

@@ -31,7 +31,7 @@ func GetTarFile() (*File, error) {
 	opts := &archive.TarOptions{
 		Compression:     archive.Zstd,
 		ExcludePatterns: exclude.Patterns,
-		IncludeFiles:    []string{"."},
+		IncludeFiles:    []string{".", "Dockerfile"},
 	}
 	body, err := archive.TarWithOptions(cwd, opts)
 	if err != nil {
