@@ -22,16 +22,19 @@ func GetTarFile() (*File, error) {
 	exclude := new(xignore.Ignorefile)
 	input, err := os.Open(filepath.Join(cwd, ".dockerignore"))
 	if err == nil {
-		err = exclude.FromReader(input)
-		if err != nil {
+		if err = exclude.FromReader(input); err != nil {
 			return nil, err
 		}
 	}
-	exclude.Patterns = append(exclude.Patterns, ".git", ".bzr", ".hg", ".svn")
+	excludes := []string{".git", ".bzr", ".hg", ".svn"}
+	for _, pattern := range exclude.Patterns {
+		if pattern != "Dockerfile" {
+			excludes = append(excludes, pattern)
+		}
+	}
 	opts := &archive.TarOptions{
 		Compression:     archive.Zstd,
-		ExcludePatterns: exclude.Patterns,
-		IncludeFiles:    []string{".", "Dockerfile"},
+		ExcludePatterns: excludes,
 	}
 	body, err := archive.TarWithOptions(cwd, opts)
 	if err != nil {

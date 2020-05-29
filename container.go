@@ -10,7 +10,7 @@ type ContainerService interface {
 	List(appID string) ([]*Container, error)
 }
 
-func (d *ContainerClient) List(appID string) (containers []*Container, err error) {
-	err = d.client.doList("apps/"+appID+"/containers", nil, &containers)
+func (c *ContainerClient) List(appID string) (containers []*Container, err error) {
+	err = c.client.doList("apps/"+appID+"/containers", nil, &containers)
 	return
 }

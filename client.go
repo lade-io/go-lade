@@ -20,6 +20,7 @@ type Client struct {
 	Log        LogService
 	Plan       PlanService
 	Process    ProcessService
+	Quota      QuotaService
 	Region     RegionService
 	Release    ReleaseService
 	Service    ServiceService
@@ -61,6 +62,7 @@ func NewClient(httpClient *http.Client) *Client {
 	c.Log = &LogClient{client: c}
 	c.Plan = &PlanClient{client: c}
 	c.Process = &ProcessClient{client: c}
+	c.Quota = &QuotaClient{client: c}
 	c.Region = &RegionClient{client: c}
 	c.Release = &ReleaseClient{client: c}
 	c.Service = &ServiceClient{client: c}

@@ -10,7 +10,7 @@ type RegionService interface {
 	List() ([]*Region, error)
 }
 
-func (a *RegionClient) List() (regions []*Region, err error) {
-	err = a.client.doList("regions", nil, &regions)
+func (r *RegionClient) List() (regions []*Region, err error) {
+	err = r.client.doList("regions", nil, &regions)
 	return
 }

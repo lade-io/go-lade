@@ -5,8 +5,9 @@ os:
   - linux
 script:
   - go vet
+  - PREVIOUS_TAG=$(git tag | tail -2 | head -1)
   - printf '## Changelog\n\n' > CHANGELOG.md
-  - git log --pretty=oneline --abbrev-commit --no-color $TRAVIS_COMMIT >> CHANGELOG.md
+  - git log --pretty=oneline --abbrev-commit --no-color $PREVIOUS_TAG..$TRAVIS_TAG >> CHANGELOG.md
 deploy:
   - provider: releases
     token: $GITHUB_TOKEN

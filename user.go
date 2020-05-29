@@ -7,10 +7,10 @@ type UserClient struct {
 }
 
 type UserService interface {
-	Get() (*User, error)
+	Me() (*User, error)
 }
 
-func (u *UserClient) Get() (user *User, err error) {
+func (u *UserClient) Me() (user *User, err error) {
 	user = new(User)
 	err = u.client.doGet("users/me", nil, user)
 	return

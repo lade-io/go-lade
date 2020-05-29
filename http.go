@@ -163,13 +163,13 @@ func (c *Client) doStream(path string, params interface{}, handler LogHandler) e
 		path += "?" + query
 	}
 	client := sse.NewClient(c.apiURL + path)
-	client.Connection.Transport = c.httpClient.Transport
+	client.Connection = c.httpClient
 	ctx, cancel := context.WithCancel(context.Background())
 	return client.SubscribeRawWithContext(ctx, func(msg *sse.Event) {
 		if len(msg.Data) > 0 {
 			entry := new(LogEntry)
 			err := json.Unmarshal(msg.Data, entry)
-			if err != nil {
+			if err != nil || entry.Source == "ping" {
 				return
 			}
 			handler(cancel, entry)

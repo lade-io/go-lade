@@ -11,9 +11,9 @@ type ServiceService interface {
 	List() ([]*Service, error)
 }
 
-func (a *ServiceClient) Get(id string) (service *Service, err error) {
+func (s *ServiceClient) Get(id string) (service *Service, err error) {
 	service = new(Service)
-	err = a.client.doByID("services", id, nil, service)
+	err = s.client.doByID("services", id, nil, service)
 	return
 }
 

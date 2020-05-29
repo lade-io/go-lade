@@ -100,6 +100,13 @@ type Process struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
+type Quota struct {
+	ID     int    `json:"id"`
+	PlanID string `json:"plan_id"`
+	UserID int    `json:"user_id"`
+	Quota  int    `json:"quota"`
+}
+
 type Region struct {
 	ID      string `json:"id"`
 	Name    string `json:"name"`
