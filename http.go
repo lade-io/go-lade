@@ -4,18 +4,16 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
 	"io"
 	"io/ioutil"
 	"mime/multipart"
 	"net"
 	"net/http"
-	"net/url"
-	"strings"
 
 	"github.com/dyninc/qstring"
 	"github.com/fatih/structs"
 	"github.com/r3labs/sse"
+	"gopkg.in/cenkalti/backoff.v1"
 	"nhooyr.io/websocket"
 )
 
@@ -93,7 +91,7 @@ func (c *Client) doGet(path string, params, out interface{}) error {
 		}
 		path += "?" + query
 	}
-	return c.doRequest(http.MethodGet, path, "", nil, out)
+	return c.doRequest(http.MethodGet, path, jsonType, nil, out)
 }
 
 func (c *Client) doList(path string, params, out interface{}) error {
@@ -164,47 +162,40 @@ func (c *Client) doStream(path string, params interface{}, handler LogHandler) e
 	}
 	client := sse.NewClient(c.apiURL + path)
 	client.Connection = c.httpClient
+	client.Headers["Content-Type"] = "text/event-stream"
 	ctx, cancel := context.WithCancel(context.Background())
-	return client.SubscribeRawWithContext(ctx, func(msg *sse.Event) {
-		if len(msg.Data) > 0 {
-			entry := new(LogEntry)
-			err := json.Unmarshal(msg.Data, entry)
-			if err != nil || entry.Source == "ping" {
-				return
+	for {
+		client.SubscribeRawWithContext(ctx, func(msg *sse.Event) {
+			switch string(msg.Event) {
+			case "data":
+				entry := new(LogEntry)
+				err := json.Unmarshal(msg.Data, entry)
+				if err != nil || entry.Source == "ping" {
+					return
+				}
+				handler(cancel, entry)
+			case "EOF":
+				cancel()
 			}
-			handler(cancel, entry)
+		})
+		if ctx.Err() != nil {
+			return nil
 		}
-	})
+	}
 }
 
 func (c *Client) doWebsocket(path string, handler ConnHandler) error {
-	u, err := url.Parse(c.apiURL + path)
-	if err != nil {
-		return err
-	}
-	u.Scheme = strings.Replace(u.Scheme, "http", "ws", 1)
-
-	ctx := context.Background()
-	ws, resp, err := websocket.Dial(ctx, u.String(), &websocket.DialOptions{
-		HTTPClient: c.httpClient,
-	})
-	if err != nil {
-		if resp != nil && resp.StatusCode != http.StatusSwitchingProtocols {
-			err = ErrServerError
+	operation := func() error {
+		ctx := context.Background()
+		ws, _, err := websocket.Dial(ctx, c.apiURL+path, &websocket.DialOptions{
+			HTTPClient: c.httpClient,
+		})
+		if err != nil {
+			return err
 		}
-		return err
+		conn := websocket.NetConn(ctx, ws, websocket.MessageText)
+		defer conn.Close()
+		return handler(conn)
 	}
-
-	conn := websocket.NetConn(ctx, ws, websocket.MessageText)
-	defer conn.Close()
-
-	err = handler(conn)
-	var ce websocket.CloseError
-	if errors.As(err, &ce) {
-		if ce.Reason == "" {
-			return nil
-		}
-		return errors.New(ce.Reason)
-	}
-	return err
+	return backoff.Retry(operation, backoff.NewExponentialBackOff())
 }
