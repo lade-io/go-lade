@@ -50,7 +50,7 @@ func main() {
 	httpClient := conf.Client(ctx, token)
 	client := lade.NewClient(httpClient)
 
-	user, err := client.User.Get()
+	user, err := client.User.Me()
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -27,6 +27,7 @@ type AddonService interface {
 	Create(opts *AddonCreateOpts) (*Addon, error)
 	Delete(addon *Addon) error
 	Get(id string) (*Addon, error)
+	Head(id string) error
 	List() ([]*Addon, error)
 	Update(id string, opts *AddonUpdateOpts) (*Addon, error)
 }
@@ -45,6 +46,10 @@ func (a *AddonClient) Get(id string) (addon *Addon, err error) {
 	addon = new(Addon)
 	err = a.client.doByID("addons", id, nil, addon)
 	return
+}
+
+func (a *AddonClient) Head(id string) error {
+	return a.client.doByID("addons", id, nil, nil)
 }
 
 func (a *AddonClient) List() (addons []*Addon, err error) {

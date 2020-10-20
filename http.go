@@ -38,6 +38,7 @@ type httpService interface {
 	doDelete(path string, params interface{}) error
 	doForm(path string, params, out interface{}) error
 	doGet(path string, params, out interface{}) error
+	doHead(path string, params interface{}) error
 	doList(path string, params, out interface{}) error
 	doUpdate(path string, params, out interface{}) error
 	doRequest(method, path, ctype string, params, out interface{}) error
@@ -45,9 +46,25 @@ type httpService interface {
 	doWebsocket(path string, handler ConnHandler) error
 }
 
+func addParams(path string, params interface{}) (string, error) {
+	if params != nil {
+		query, err := qstring.MarshalString(params)
+		if err != nil {
+			return "", err
+		}
+		if query != "" {
+			path += "?" + query
+		}
+	}
+	return path, nil
+}
+
 func (c *Client) doByID(path, id string, params, out interface{}) error {
 	if id == "" {
 		return ErrNotFound
+	}
+	if out == nil {
+		return c.doHead(path+"/"+id, params)
 	}
 	return c.doGet(path+"/"+id, params, out)
 }
@@ -84,14 +101,19 @@ func (c *Client) doForm(path string, params, out interface{}) error {
 }
 
 func (c *Client) doGet(path string, params, out interface{}) error {
-	if params != nil {
-		query, err := qstring.MarshalString(params)
-		if err != nil {
-			return err
-		}
-		path += "?" + query
+	path, err := addParams(path, params)
+	if err != nil {
+		return err
 	}
 	return c.doRequest(http.MethodGet, path, jsonType, nil, out)
+}
+
+func (c *Client) doHead(path string, params interface{}) error {
+	path, err := addParams(path, params)
+	if err != nil {
+		return err
+	}
+	return c.doRequest(http.MethodHead, path, jsonType, nil, nil)
 }
 
 func (c *Client) doList(path string, params, out interface{}) error {
@@ -153,12 +175,9 @@ func (c *Client) doRequest(method, path, ctype string, params, out interface{}) 
 }
 
 func (c *Client) doStream(path string, params interface{}, handler LogHandler) error {
-	query, err := qstring.MarshalString(params)
+	path, err := addParams(path, params)
 	if err != nil {
 		return err
-	}
-	if query != "" {
-		path += "?" + query
 	}
 	client := sse.NewClient(c.apiURL + path)
 	client.Connection = c.httpClient

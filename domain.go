@@ -16,6 +16,7 @@ type DomainService interface {
 	Create(appID string, opts *DomainCreateOpts) (*Domain, error)
 	Delete(domain *Domain) error
 	Get(appID, domainID string) (*Domain, error)
+	Head(appID, domainID string) error
 	List(appID string) ([]*Domain, error)
 }
 
@@ -34,6 +35,10 @@ func (d *DomainClient) Get(appID, domainID string) (domain *Domain, err error) {
 	domain = new(Domain)
 	err = d.client.doByID("apps/"+appID+"/domains", domainID, nil, domain)
 	return
+}
+
+func (d *DomainClient) Head(appID, domainID string) error {
+	return d.client.doByID("apps/"+appID+"/domains", domainID, nil, nil)
 }
 
 func (d *DomainClient) List(appID string) (domains []*Domain, err error) {

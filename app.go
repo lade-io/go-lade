@@ -17,6 +17,7 @@ type AppService interface {
 	Create(opts *AppCreateOpts) (*App, error)
 	Delete(app *App) error
 	Get(id string) (*App, error)
+	Head(id string) error
 	List() ([]*App, error)
 }
 
@@ -34,6 +35,10 @@ func (a *AppClient) Get(id string) (app *App, err error) {
 	app = new(App)
 	err = a.client.doByID("apps", id, nil, app)
 	return
+}
+
+func (a *AppClient) Head(id string) error {
+	return a.client.doByID("apps", id, nil, nil)
 }
 
 func (a *AppClient) List() (apps []*App, err error) {
