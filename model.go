@@ -1,6 +1,10 @@
 package lade
 
-import "time"
+import (
+	"time"
+
+	"github.com/saulortega/pgeo.latlng"
+)
 
 type Addon struct {
 	ID           int       `json:"id"`
@@ -59,6 +63,15 @@ type Container struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
+type Disk struct {
+	ID        int       `json:"id"`
+	AppID     int       `json:"app_id"`
+	PlanID    string    `json:"plan_id"`
+	Name      string    `json:"name"`
+	Path      string    `json:"path"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
 type Domain struct {
 	ID        int       `json:"id"`
 	AppID     int       `json:"app_id"`
@@ -108,9 +121,10 @@ type Quota struct {
 }
 
 type Region struct {
-	ID      string `json:"id"`
-	Name    string `json:"name"`
-	Country string `json:"country"`
+	ID       string     `json:"id"`
+	Name     string     `json:"name"`
+	Country  string     `json:"country"`
+	Location pgeo.Point `json:"location"`
 }
 
 type Release struct {
@@ -149,6 +163,6 @@ type User struct {
 	Username  string    `json:"username"`
 	Email     string    `json:"email"`
 	Name      string    `json:"name"`
-	Region    string    `json:"region"`
+	RegionID  string    `json:"region_id"`
 	CreatedAt time.Time `json:"created_at"`
 }

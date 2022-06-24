@@ -181,7 +181,6 @@ func (c *Client) doStream(path string, params interface{}, handler LogHandler) e
 	}
 	client := sse.NewClient(c.apiURL + path)
 	client.Connection = c.httpClient
-	client.Headers["Content-Type"] = "text/event-stream"
 	ctx, cancel := context.WithCancel(context.Background())
 	for {
 		client.SubscribeRawWithContext(ctx, func(msg *sse.Event) {
@@ -206,10 +205,13 @@ func (c *Client) doStream(path string, params interface{}, handler LogHandler) e
 func (c *Client) doWebsocket(path string, handler ConnHandler) error {
 	operation := func() error {
 		ctx := context.Background()
-		ws, _, err := websocket.Dial(ctx, c.apiURL+path, &websocket.DialOptions{
+		ws, resp, err := websocket.Dial(ctx, c.apiURL+path, &websocket.DialOptions{
 			HTTPClient: c.httpClient,
 		})
 		if err != nil {
+			if resp.StatusCode == http.StatusInternalServerError {
+				return backoff.Permanent(ErrServerError)
+			}
 			return err
 		}
 		conn := websocket.NetConn(ctx, ws, websocket.MessageText)

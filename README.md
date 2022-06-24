@@ -1,7 +1,7 @@
 # Go Lade
 
-[![Build Status](https://travis-ci.com/lade-io/go-lade.svg?branch=master)](https://travis-ci.com/lade-io/go-lade)
-[![GoDoc](https://img.shields.io/badge/godoc-reference-5272B4.svg)](https://godoc.org/github.com/lade-io/go-lade)
+[![Build Status](https://img.shields.io/github/workflow/status/lade-io/go-lade/Release.svg)](https://github.com/lade-io/go-lade/actions/workflows/release.yml)
+[![Go.Dev Reference](https://img.shields.io/badge/go.dev-reference-blue.svg)](https://pkg.go.dev/github.com/lade-io/go-lade)
 [![Release](https://img.shields.io/github/v/release/lade-io/go-lade.svg)](https://github.com/lade-io/go-lade/releases/latest)
 
 Go Lade is a Go client library for the Lade V1 API.
@@ -39,7 +39,7 @@ func main() {
 		Endpoint: lade.Endpoint,
 	}
 
-	ctx := oauth2.NoContext
+	ctx := context.Background()
 	username, password := getCredentials()
 
 	token, err := conf.PasswordCredentialsToken(ctx, username, password)

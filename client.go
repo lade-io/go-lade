@@ -15,6 +15,7 @@ type Client struct {
 	App        AppService
 	Attachment AttachmentService
 	Container  ContainerService
+	Disk       DiskService
 	Domain     DomainService
 	Env        EnvService
 	Log        LogService
@@ -30,8 +31,9 @@ type Client struct {
 var (
 	DefaultScopes = []string{"app", "user", "offline"}
 	Endpoint      = oauth2.Endpoint{
-		AuthURL:  "https://lade.io/login/oauth2/authorize",
-		TokenURL: "https://lade.io/login/oauth2/token",
+		AuthURL:   "https://lade.io/login/oauth2/authorize",
+		TokenURL:  "https://lade.io/login/oauth2/token",
+		AuthStyle: oauth2.AuthStyleInHeader,
 	}
 )
 
@@ -57,6 +59,7 @@ func NewClient(httpClient *http.Client) *Client {
 	c.App = &AppClient{client: c}
 	c.Attachment = &AttachmentClient{client: c}
 	c.Container = &ContainerClient{client: c}
+	c.Disk = &DiskClient{client: c}
 	c.Domain = &DomainClient{client: c}
 	c.Env = &EnvClient{client: c}
 	c.Log = &LogClient{client: c}
