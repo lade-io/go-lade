@@ -2,7 +2,6 @@ package lade
 
 import (
 	"net/http"
-	"time"
 
 	"golang.org/x/oauth2"
 )
@@ -40,7 +39,6 @@ var (
 const (
 	DefaultClientID  = "lade-client"
 	defaultAPIURL    = "https://api.lade.io"
-	defaultTimeout   = 30 * time.Second
 	apiVersion       = "/v1/"
 	libraryUserAgent = "go-lade/" + libraryVersion
 	libraryVersion   = "1.0"

@@ -1,6 +1,6 @@
 # Go Lade
 
-[![Build Status](https://img.shields.io/github/workflow/status/lade-io/go-lade/Release.svg)](https://github.com/lade-io/go-lade/actions/workflows/release.yml)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/lade-io/go-lade/release.yml)](https://github.com/lade-io/go-lade/actions/workflows/release.yml)
 [![Go.Dev Reference](https://img.shields.io/badge/go.dev-reference-blue.svg)](https://pkg.go.dev/github.com/lade-io/go-lade)
 [![Release](https://img.shields.io/github/v/release/lade-io/go-lade.svg)](https://github.com/lade-io/go-lade/releases/latest)
 

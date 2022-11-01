@@ -145,10 +145,6 @@ func (c *Client) doRequest(method, path, ctype string, params, out interface{}) 
 	req.Header.Set("Accept", jsonType)
 	req.Header.Set("User-Agent", c.userAgent)
 
-	ctx, cancel := context.WithTimeout(req.Context(), defaultTimeout)
-	defer cancel()
-
-	req = req.WithContext(ctx)
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		return err
