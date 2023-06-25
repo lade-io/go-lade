@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"io"
 	"io/ioutil"
 	"mime/multipart"
@@ -177,13 +178,24 @@ func (c *Client) doStream(path string, params interface{}, handler LogHandler) e
 	}
 	client := sse.NewClient(c.apiURL + path)
 	client.Connection = c.httpClient
+	client.ResponseValidator = func(c *sse.Client, resp *http.Response) error {
+		switch resp.StatusCode {
+		case http.StatusOK, http.StatusBadGateway, http.StatusGatewayTimeout:
+			return nil
+		}
+		defer resp.Body.Close()
+		err = &APIError{Status: resp.StatusCode}
+		json.NewDecoder(resp.Body).Decode(&err)
+		return backoff.Permanent(err)
+	}
+
 	ctx, cancel := context.WithCancel(context.Background())
 	for {
-		client.SubscribeRawWithContext(ctx, func(msg *sse.Event) {
+		err = client.SubscribeRawWithContext(ctx, func(msg *sse.Event) {
 			switch string(msg.Event) {
 			case "data":
 				entry := new(LogEntry)
-				err := json.Unmarshal(msg.Data, entry)
+				err = json.Unmarshal(msg.Data, entry)
 				if err != nil || entry.Source == "ping" {
 					return
 				}
@@ -192,8 +204,9 @@ func (c *Client) doStream(path string, params interface{}, handler LogHandler) e
 				cancel()
 			}
 		})
-		if ctx.Err() != nil {
-			return nil
+		var e *APIError
+		if errors.As(err, &e) || ctx.Err() != nil {
+			return err
 		}
 	}
 }
