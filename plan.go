@@ -7,30 +7,27 @@ type PlanClient struct {
 }
 
 type PlanOpts struct {
-	ID   string `qstring:"id,omitempty"`
-	Type string `qstring:"type,omitempty"`
+	ID string `qstring:"id,omitempty"`
 }
 
 type PlanService interface {
-	Default(ptype string) (*Plan, error)
-	List(ptype string) ([]*Plan, error)
-	User(id, ptype string) ([]*Plan, error)
+	Default() (*Plan, error)
+	List() ([]*Plan, error)
+	User(id string) ([]*Plan, error)
 }
 
-func (p *PlanClient) Default(ptype string) (plan *Plan, err error) {
-	opts := &PlanOpts{Type: ptype}
-	err = p.client.doGet("plans/default", opts, &plan)
+func (p *PlanClient) Default() (plan *Plan, err error) {
+	err = p.client.doGet("plans/default", nil, &plan)
 	return
 }
 
-func (p *PlanClient) List(ptype string) (plans []*Plan, err error) {
-	opts := &PlanOpts{Type: ptype}
-	err = p.client.doList("plans", opts, &plans)
+func (p *PlanClient) List() (plans []*Plan, err error) {
+	err = p.client.doList("plans", nil, &plans)
 	return
 }
 
-func (p *PlanClient) User(id, ptype string) (plans []*Plan, err error) {
-	opts := &PlanOpts{ID: id, Type: ptype}
+func (p *PlanClient) User(id string) (plans []*Plan, err error) {
+	opts := &PlanOpts{ID: id}
 	err = p.client.doList("plans/user", opts, &plans)
 	return
 }
