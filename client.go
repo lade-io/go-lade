@@ -29,8 +29,8 @@ type Client struct {
 var (
 	DefaultScopes = []string{"app", "user", "offline"}
 	Endpoint      = oauth2.Endpoint{
-		AuthURL:   "https://lade.io/login/oauth2/authorize",
-		TokenURL:  "https://lade.io/login/oauth2/token",
+		AuthURL:   defaultAPIURL + "/login/oauth2/authorize",
+		TokenURL:  defaultAPIURL + "/login/oauth2/token",
 		AuthStyle: oauth2.AuthStyleInHeader,
 	}
 )
