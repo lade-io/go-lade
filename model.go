@@ -63,6 +63,15 @@ type Container struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
+type Disk struct {
+	ID        int       `json:"id"`
+	AppID     int       `json:"app_id"`
+	PlanID    string    `json:"plan_id"`
+	Name      string    `json:"name"`
+	Path      string    `json:"path"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
 type Domain struct {
 	ID        int       `json:"id"`
 	AppID     int       `json:"app_id"`
