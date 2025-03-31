@@ -6,7 +6,7 @@ require (
 	github.com/containers/storage v1.32.3
 	github.com/dyninc/qstring v0.0.0-20160719172318-ab5840a88e81
 	github.com/fatih/structs v1.1.0
-	github.com/r3labs/sse v0.0.0-20210224172625-26fe804710bc
+	github.com/r3labs/sse/v2 v2.10.0
 	github.com/saulortega/pgeo.latlng v0.0.0-20180629162213-95aebe6d6520
 	github.com/zealic/xignore v0.3.3
 	golang.org/x/oauth2 v0.0.0-20220630143837-2104d58473e0
@@ -34,3 +34,5 @@ require (
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.28.0 // indirect
 )
+
+replace github.com/r3labs/sse/v2 => github.com/wwade/sse/v2 v2.10.1

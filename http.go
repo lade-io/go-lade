@@ -10,10 +10,13 @@ import (
 	"mime/multipart"
 	"net"
 	"net/http"
+	"strings"
+	"time"
 
 	"github.com/dyninc/qstring"
 	"github.com/fatih/structs"
-	"github.com/r3labs/sse"
+	"github.com/r3labs/sse/v2"
+	"golang.org/x/oauth2"
 	"gopkg.in/cenkalti/backoff.v1"
 	"nhooyr.io/websocket"
 )
@@ -171,25 +174,25 @@ func (c *Client) doRequest(method, path, ctype string, params, out interface{}) 
 	return err
 }
 
+func (c *Client) newSSEClient(path string) (context.Context, context.CancelFunc, *sse.Client) {
+	ctx, cancel := context.WithCancel(context.Background())
+	client := sse.NewClient(c.apiURL + path)
+	client.Connection = c.httpClient
+	client.ReconnectNotify = backoff.Notify(func(err error, delay time.Duration) {
+		var e *oauth2.RetrieveError
+		if errors.As(err, &e) && e.Response.StatusCode < 404 {
+			cancel()
+		}
+	})
+	return ctx, cancel, client
+}
+
 func (c *Client) doStream(path string, params interface{}, handler LogHandler) error {
 	path, err := addParams(path, params)
 	if err != nil {
 		return err
 	}
-	client := sse.NewClient(c.apiURL + path)
-	client.Connection = c.httpClient
-	client.ResponseValidator = func(c *sse.Client, resp *http.Response) error {
-		switch resp.StatusCode {
-		case http.StatusOK, http.StatusBadGateway, http.StatusGatewayTimeout:
-			return nil
-		}
-		defer resp.Body.Close()
-		err = &APIError{Status: resp.StatusCode}
-		json.NewDecoder(resp.Body).Decode(&err)
-		return backoff.Permanent(err)
-	}
-
-	ctx, cancel := context.WithCancel(context.Background())
+	ctx, cancel, client := c.newSSEClient(path)
 	for {
 		err = client.SubscribeRawWithContext(ctx, func(msg *sse.Event) {
 			switch string(msg.Event) {
@@ -204,8 +207,12 @@ func (c *Client) doStream(path string, params interface{}, handler LogHandler) e
 				cancel()
 			}
 		})
-		var e *APIError
-		if errors.As(err, &e) || ctx.Err() != nil {
+		if ctx.Err() != nil {
+			var e *oauth2.RetrieveError
+			if errors.As(err, &e) {
+				lines := strings.SplitN(e.Error(), "\n", 2)
+				return errors.New(lines[0])
+			}
 			return err
 		}
 	}

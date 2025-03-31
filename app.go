@@ -10,6 +10,7 @@ type AppClient struct {
 
 type AppCreateOpts struct {
 	Name     string `json:"name"`
+	PlanID   string `json:"plan_id"`
 	RegionID string `json:"region_id"`
 }
 

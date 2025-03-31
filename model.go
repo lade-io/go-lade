@@ -30,6 +30,7 @@ type App struct {
 	ID        int       `json:"id"`
 	Name      string    `json:"name"`
 	Owner     *User     `json:"owner"`
+	PlanID    string    `json:"plan_id"`
 	Region    *Region   `json:"region"`
 	Status    string    `json:"status"`
 	Hostname  string    `json:"hostname"`
