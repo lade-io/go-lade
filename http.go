@@ -176,11 +176,15 @@ func (c *Client) doRequest(method, path, ctype string, params, out interface{}) 
 
 func (c *Client) newSSEClient(path string) (context.Context, context.CancelFunc, *sse.Client) {
 	ctx, cancel := context.WithCancel(context.Background())
+	back := backoff.NewExponentialBackOff()
+	back.MaxElapsedTime = 0
 	client := sse.NewClient(c.apiURL + path)
 	client.Connection = c.httpClient
+	client.ReconnectStrategy = back
 	client.ReconnectNotify = backoff.Notify(func(err error, delay time.Duration) {
 		var e *oauth2.RetrieveError
-		if errors.As(err, &e) && e.Response.StatusCode < 404 {
+		if (errors.As(err, &e) && e.Response.StatusCode < 404) ||
+			strings.HasSuffix(err.Error(), http.StatusText(404)) {
 			cancel()
 		}
 	})
@@ -203,6 +207,7 @@ func (c *Client) doStream(path string, params interface{}, handler LogHandler) e
 					return
 				}
 				handler(cancel, entry)
+				client.ReconnectStrategy.Reset()
 			case "EOF":
 				cancel()
 			}
@@ -215,6 +220,7 @@ func (c *Client) doStream(path string, params interface{}, handler LogHandler) e
 			}
 			return err
 		}
+		time.Sleep(client.ReconnectStrategy.NextBackOff())
 	}
 }
 
